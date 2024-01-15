@@ -27,7 +27,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "gh-pages -d build",
+    "deploy": "gh-pages -d build -b gh-pages",
     "predeploy": "npm run build"
   },
   "eslintConfig": {
@@ -53,5 +53,6 @@
     "@types/react-leaflet": "^3.0.0",
     "@types/uuid": "^9.0.7",
     "gh-pages": "^6.1.1"
-  }
+  },
+  "homepage": "https://maksym-mishchanchuk.github.io/react-map-viso"
 }
