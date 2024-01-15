@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/react-map-viso/static/css/main.cc724df8.css",
+    "main.js": "/react-map-viso/static/js/main.44f00014.js",
+    "static/js/787.0508147e.chunk.js": "/react-map-viso/static/js/787.0508147e.chunk.js",
+    "index.html": "/react-map-viso/index.html",
+    "main.cc724df8.css.map": "/react-map-viso/static/css/main.cc724df8.css.map",
+    "main.44f00014.js.map": "/react-map-viso/static/js/main.44f00014.js.map",
+    "787.0508147e.chunk.js.map": "/react-map-viso/static/js/787.0508147e.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.cc724df8.css",
+    "static/js/main.44f00014.js"
+  ]
+}
