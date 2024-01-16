@@ -1,27 +1,62 @@
-import React, {useState} from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvent } from 'react-leaflet';
+import React, {useEffect, useState} from 'react';
+import { MapContainer, TileLayer, useMapEvent } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L, {Icon, LeafletMouseEvent} from 'leaflet';
+import L, { LeafletMouseEvent } from 'leaflet';
 import './index.css'
 import './App.css'
 import { v4 as uuidv4 } from 'uuid';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button';
-
-type Marker = {
-  numberPositionList: number
-  geo: [number, number],
-  id: string,
-}
-
-const customIcon = new Icon({
-  iconUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Map_pin_icon_green.svg/800px-Map_pin_icon_green.svg.png",
-  iconSize: [30, 38],
-})
-
+import { db } from './firebase';
+import { collection, setDoc, doc, getDocs } from "firebase/firestore";
+import { MarkerType } from "./types/MarkerType";
+import { MarkersList } from "./components/MarkersList/MarkersList";
 
 const App: React.FC = () => {
-  const [markers, setMarkers] = useState<Marker[]>([]);
+  const [markers, setMarkers] = useState<MarkerType[]>([]);
+
+  useEffect(() => {
+    const updateFirebaseData = async () => {
+      const firebaseData = markers.map(({ numberPositionList, geo }) => ({
+        Location: { Lat: geo[0], Long: geo[1] },
+        Timestamp: new Date(),
+        Next: markers.length + 1,
+      }));
+
+      const questCollectionRef = collection(db, 'quests');
+
+      await Promise.all(firebaseData.map(async (data, index) => {
+        await setDoc(doc(questCollectionRef, `Quest ${index + 1}`), data);
+      }));
+
+      return "Мітку додану в базу";
+    };
+
+
+    const fetchData = async () => {
+      const result = await updateFirebaseData();
+      console.log(result);
+    };
+
+    fetchData().then(r => console.log(r));
+  }, [markers]);
+
+  //function for reading firebaseData
+  const readDataFromFirestore = async () => {
+    const questCollectionRef = collection(db, 'quests');
+
+    try {
+      const querySnapshot = await getDocs(questCollectionRef);
+
+      querySnapshot.forEach((doc) => {
+        console.log('Document ID:', doc.id);
+        console.log('Document Data:', doc.data());
+      });
+    } catch (error) {
+      console.error('Error reading data from Firestore:', error);
+    }
+  };
+  ///
 
   const handleMapClick = (event: LeafletMouseEvent) => {
     const newMarkerPosition: [number, number] = [event.latlng.lat, event.latlng.lng];
@@ -40,20 +75,8 @@ const App: React.FC = () => {
     return null;
   };
 
-  const handleDeleteMarker = (idMarker: string, event: React.MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    setMarkers(prevState => prevState.filter(({ id }) => id !== idMarker));
-  };
-
-  const handleDeleteAllMarkers = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDeleteAllMarkers = () => {
     setMarkers([]);
-  };
-
-  const handleMarkerDragEnd = (idMarker: string, event: L.DragEndEvent) => {
-    const newMarkerPosition: [number, number] = [event.target.getLatLng().lat, event.target.getLatLng().lng];
-    setMarkers((prevState) => prevState.map(marker =>
-      marker.id === idMarker ? { ...marker, geo: newMarkerPosition } : marker
-    ));
   };
 
 
@@ -69,30 +92,10 @@ const App: React.FC = () => {
 
       <MapEvents />
 
-      {markers.map(({id, geo, numberPositionList}) => (
-        <Marker
-          key={id}
-          position={geo}
-          icon={customIcon}
-          draggable={true}
-          eventHandlers={{
-            dragend: (event) => handleMarkerDragEnd(id, event),
-          }}
-        >
-          <Popup>{`Маркер ${numberPositionList}`}
-            <br/>
-            <Button
-              style={{
-                marginTop: '10px',
-              }}
-              size="sm"
-              variant="primary"
-              onClick={(event) => handleDeleteMarker(id, event)}>
-              Delete
-            </Button>
-          </Popup>
-        </Marker>
-      ))}
+      <MarkersList
+        markers={markers}
+        setMarkers={setMarkers}
+      />
 
       {!!markers.length && (
         <Button
@@ -105,7 +108,7 @@ const App: React.FC = () => {
           }}
           size="sm"
           variant="primary"
-          onClick={(event) => handleDeleteAllMarkers(event)}
+          onClick={() => handleDeleteAllMarkers()}
         >
           Delete All
         </Button>
