@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, useMapEvent } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L, { LeafletMouseEvent } from 'leaflet';
@@ -32,13 +32,7 @@ const App: React.FC = () => {
       return "Мітку додану в базу";
     };
 
-
-    const fetchData = async () => {
-      const result = await updateFirebaseData();
-      console.log(result);
-    };
-
-    fetchData().then(r => console.log(r));
+    updateFirebaseData().then(result => console.log(result));
   }, [markers]);
 
   //function for reading firebaseData
@@ -79,7 +73,6 @@ const App: React.FC = () => {
     setMarkers([]);
   };
 
-
   return (
     <MapContainer
       center={[49.0, 31.0]}
@@ -89,9 +82,7 @@ const App: React.FC = () => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-
       <MapEvents />
-
       <MarkersList
         markers={markers}
         setMarkers={setMarkers}
